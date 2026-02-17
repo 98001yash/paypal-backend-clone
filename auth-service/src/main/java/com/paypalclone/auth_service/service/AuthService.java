@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Map;
 
 @Service
@@ -26,6 +28,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
 
+    @Transactional
     public TokenResponse login(LoginRequest request) {
 
         log.info("Login attempt for email: {}", request.getEmail());
@@ -61,6 +64,7 @@ public class AuthService {
         return new TokenResponse(accessToken, refreshToken.getToken());
     }
 
+    @Transactional
     public TokenResponse refresh(String refreshTokenValue) {
 
         log.info("Refreshing token");
@@ -82,6 +86,7 @@ public class AuthService {
         return new TokenResponse(newAccessToken, refreshTokenValue);
     }
 
+    @Transactional
     public void logout(String refreshTokenValue) {
         log.info("Logout requested");
         RefreshToken token =
