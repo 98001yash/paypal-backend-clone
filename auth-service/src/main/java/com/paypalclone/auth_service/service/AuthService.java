@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +45,7 @@ public class AuthService {
                             request.getPassword()
                     )
             );
-        } catch (JwtException ex) {
+        } catch (AuthenticationException ex) {
             log.warn("Invalid login attempt for {}", request.getEmail());
             throw new InvalidCredentialsException();
         }
