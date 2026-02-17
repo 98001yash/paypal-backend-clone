@@ -44,6 +44,7 @@
     <modules>
         <module>auth-service</module>
         <module>discovery-server</module>
+        <module>event-contracts</module>
     </modules>
 
 </project>
