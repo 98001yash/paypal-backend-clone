@@ -44,7 +44,6 @@ public class UserRegisteredEventListener {
         user.setRiskState(RiskState.NORMAL);
 
         userRepository.save(user);
-
         log.info("User created in User Service for authUserId={}", event.getUserId());
     }
 }
