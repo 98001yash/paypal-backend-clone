@@ -3,6 +3,7 @@ package com.paypalclone.base;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @Getter
 @SuperBuilder
+@NoArgsConstructor(force = true)
 public abstract class BaseEvent {
 
     private final String eventId;
