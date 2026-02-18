@@ -34,6 +34,14 @@ spring:
             - Path=/auth/**
 
 
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user/**
+          filters:
+            - AuthenticationFilter
+
+
 jwt:
   secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
   issuer: auth-service
