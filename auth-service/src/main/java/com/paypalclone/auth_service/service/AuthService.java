@@ -38,7 +38,7 @@ public class AuthService {
 
         log.info("Login attempt for email: {}", request.getEmail());
 
-        // 1️⃣ Authenticate credentials
+        // 1️ Authenticate credentials
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -51,11 +51,11 @@ public class AuthService {
             throw new InvalidCredentialsException();
         }
 
-        // 2️⃣ Load user
+        // 2️ Load user
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(InvalidCredentialsException::new);
 
-        // 3️⃣ Build ACCESS token claims (CRITICAL)
+        // 3️ Build ACCESS token claims (CRITICAL)
         Map<String, Object> claims = new java.util.HashMap<>();
 
         claims.put("token_type", "ACCESS"); // REQUIRED by Gateway
@@ -69,16 +69,16 @@ public class AuthService {
 
         claims.put("email", user.getEmail()); // optional, useful
 
-        // 4️⃣ Generate ACCESS token
+        // 4️ Generate ACCESS token
         String accessToken = jwtService.generateAccessToken(
-                String.valueOf(user.getId()),   // ✅ SUBJECT = USER ID
+                String.valueOf(user.getId()),   //  SUBJECT = USER ID
                 claims
         );
 
-        // 5️⃣ Create refresh token
+        // 5⃣ Create refresh token
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        // 6️⃣ Publish LOGIN event
+        // 6️ Publish LOGIN event
         UserLoggedInEvent event =
                 UserLoggedInEvent.builder()
                         .eventType("USER_LOGGED_IN")
@@ -95,7 +95,7 @@ public class AuthService {
 
         log.info("Login successful for userId={}, email={}", user.getId(), user.getEmail());
 
-        // 7️⃣ Return tokens
+        // 7️ Return tokens
         return new TokenResponse(
                 accessToken,
                 refreshToken.getToken()
