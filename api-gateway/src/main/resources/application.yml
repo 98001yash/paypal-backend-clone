@@ -41,6 +41,14 @@ spring:
           filters:
             - AuthenticationFilter
 
+        # INTERNAL SYSTEM APIs
+        - id: user-service-internal
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/internal/**
+          filters:
+            - InternalServiceFilter
+
 
 jwt:
   secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
