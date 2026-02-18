@@ -2,14 +2,16 @@ package com.paypalclone.api_gateway.Jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.security.Key;
 
 @Component
 public class JwtValidator {
 
-    @Value("${jwt.secret}")
-    private String secret;
+    private final Key signingKey;
 
     @Value("${jwt.issuer}")
     private String issuer;
@@ -17,10 +19,15 @@ public class JwtValidator {
     @Value("${jwt.audience}")
     private String audience;
 
+    public JwtValidator(@Value("${jwt.secret}") String secret) {
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
     public Claims validate(String token) {
 
-        Claims claims = Jwts.parser()
-                .setSigningKey(secret)
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(signingKey)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
 

@@ -15,6 +15,10 @@ public class UserInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+
+        System.out.println(">>> X-User-Id = " + request.getHeader("X-User-Id"));
+        System.out.println(">>> X-Scopes = " + request.getHeader("X-Scopes"));
+
         String userId = request.getHeader("X-User-Id");
         String roles = request.getHeader("X-Scopes");
 

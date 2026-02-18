@@ -10,7 +10,7 @@ public class UserContextHolder {
     public static Long getCurrentUserId(){
         return currentUserId.get();
     }
-    static void setCurrentUserId(Long userId){
+    public static void setCurrentUserId(Long userId){
         currentUserId.set(userId);
     }
 
@@ -19,7 +19,7 @@ public class UserContextHolder {
         return currentUserRoles.get();
     }
 
-    static void setCurrentUserRoles(List<String> roles) {
+   public  static void setCurrentUserRoles(List<String> roles) {
 
 
         currentUserRoles.set(roles);

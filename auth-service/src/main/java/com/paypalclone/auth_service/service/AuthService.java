@@ -38,6 +38,7 @@ public class AuthService {
 
         log.info("Login attempt for email: {}", request.getEmail());
 
+        // 1️⃣ Authenticate credentials
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -46,25 +47,38 @@ public class AuthService {
                     )
             );
         } catch (AuthenticationException ex) {
-            log.warn("Invalid login attempt for {}", request.getEmail());
+            log.warn("Invalid login attempt for email={}", request.getEmail());
             throw new InvalidCredentialsException();
         }
 
+        // 2️⃣ Load user
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(InvalidCredentialsException::new);
 
-        String accessToken = jwtService.generateAccessToken(
-                user.getEmail(),
-                Map.of("roles",
-                        user.getRoles().stream()
-                                .map(Role::getName)
-                                .toList()
-                )
+        // 3️⃣ Build ACCESS token claims (CRITICAL)
+        Map<String, Object> claims = new java.util.HashMap<>();
+
+        claims.put("token_type", "ACCESS"); // REQUIRED by Gateway
+
+        claims.put(
+                "scope",
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .toList()
         );
 
+        claims.put("email", user.getEmail()); // optional, useful
+
+        // 4️⃣ Generate ACCESS token
+        String accessToken = jwtService.generateAccessToken(
+                String.valueOf(user.getId()),   // ✅ SUBJECT = USER ID
+                claims
+        );
+
+        // 5️⃣ Create refresh token
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        //  KAFKA EVENT
+        // 6️⃣ Publish LOGIN event
         UserLoggedInEvent event =
                 UserLoggedInEvent.builder()
                         .eventType("USER_LOGGED_IN")
@@ -79,10 +93,15 @@ public class AuthService {
                 event
         );
 
-        log.info("Login successful & event published for {}", request.getEmail());
+        log.info("Login successful for userId={}, email={}", user.getId(), user.getEmail());
 
-        return new TokenResponse(accessToken, refreshToken.getToken());
+        // 7️⃣ Return tokens
+        return new TokenResponse(
+                accessToken,
+                refreshToken.getToken()
+        );
     }
+
 
     @Transactional
     public TokenResponse refresh(String refreshTokenValue) {

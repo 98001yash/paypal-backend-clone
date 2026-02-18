@@ -2,6 +2,7 @@ package com.paypalclone.api_gateway.filter;
 
 import com.paypalclone.api_gateway.Jwt.JwtValidator;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class AuthenticationFilter
         extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
@@ -29,11 +31,21 @@ public class AuthenticationFilter
 
         return (exchange, chain) -> {
 
+            log.debug("[GATEWAY-AUTH] Incoming request: {} {}",
+                    exchange.getRequest().getMethod(),
+                    exchange.getRequest().getURI());
+
             String authHeader = exchange.getRequest()
                     .getHeaders()
                     .getFirst(HttpHeaders.AUTHORIZATION);
 
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if (authHeader == null) {
+                log.warn("[GATEWAY-AUTH] Missing Authorization header");
+                return unauthorized(exchange);
+            }
+
+            if (!authHeader.startsWith("Bearer ")) {
+                log.warn("[GATEWAY-AUTH] Invalid Authorization header format");
                 return unauthorized(exchange);
             }
 
@@ -42,20 +54,30 @@ public class AuthenticationFilter
             try {
                 Claims claims = jwtValidator.validate(token);
 
-                ServerHttpRequest mutatedRequest = exchange.getRequest()
+                log.info("[GATEWAY-AUTH] JWT validated successfully: sub={}, tokenType={}, scopes={}",
+                        claims.getSubject(),
+                        claims.get("token_type"),
+                        claims.get("scope"));
+
+                ServerHttpRequest request = exchange.getRequest()
                         .mutate()
-                        .header("X-User-Id", claims.getSubject())
-                        .header("X-Scopes",
-                                String.join(",", claims.get("scope", List.class)))
-                        .header("X-User-Type",
-                                claims.get("user_type", String.class))
+                        .headers(headers -> {
+                            headers.set("X-User-Id", claims.getSubject());
+                            headers.set("X-Scopes",
+                                    String.join(",", claims.get("scope", List.class)));
+                            headers.set("X-User-Type",
+                                    claims.get("user_type", String.class));
+                        })
                         .build();
 
-                return chain.filter(
-                        exchange.mutate().request(mutatedRequest).build()
-                );
+                log.debug("[GATEWAY-AUTH] Injecting headers: X-User-Id={}, X-Scopes={}",
+                        claims.getSubject(),
+                        claims.get("scope"));
+
+                return chain.filter(exchange.mutate().request(request).build());
 
             } catch (Exception ex) {
+                log.error("[GATEWAY-AUTH] Authentication failed: {}", ex.getMessage());
                 return unauthorized(exchange);
             }
         };
@@ -67,7 +89,6 @@ public class AuthenticationFilter
     }
 
     public static class Config {
-        // empty (reserved for future use)
+        // reserved for future use
     }
 }
-

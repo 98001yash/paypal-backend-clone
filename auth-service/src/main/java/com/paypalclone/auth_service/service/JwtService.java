@@ -27,11 +27,14 @@ public class JwtService {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
+                .setIssuer("auth-service")
+                .setAudience("paypal-backend")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidityMs))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
+
 
     public String extractUsername(String token) {
         return parseClaims(token).getSubject();
