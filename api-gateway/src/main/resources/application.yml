@@ -1,6 +1,3 @@
-jwt:
-  secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
-
 server:
   port: 8081
 
@@ -10,29 +7,37 @@ spring:
 
   cloud:
     gateway:
+
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
 
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "*"
+            allowedOrigins:
+              - http://localhost:3000
             allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
 
       routes:
 
+        # ? AUTH SERVICE (PUBLIC)
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/auth/**
-          filters:
-            - AuthenticationFilter
 
+
+jwt:
+  secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
+  issuer: auth-service
+  audience: paypal-backend
 
 eureka:
   client:
@@ -43,7 +48,6 @@ eureka:
 
   instance:
     prefer-ip-address: true
-
 
 logging:
   level:
