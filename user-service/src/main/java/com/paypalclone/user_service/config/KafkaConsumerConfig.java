@@ -1,5 +1,6 @@
 package com.paypalclone.user_service.config;
 
+import com.paypalclone.auth.UserRegisteredEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -18,41 +19,35 @@ import java.util.Map;
 public class KafkaConsumerConfig {
 
     @Bean
-    public ConsumerFactory<String, Object> consumerFactory() {
+    public ConsumerFactory<String, UserRegisteredEvent> consumerFactory() {
+
+        JsonDeserializer<UserRegisteredEvent> deserializer =
+                new JsonDeserializer<>(UserRegisteredEvent.class);
+
+        deserializer.addTrustedPackages("*");
+        deserializer.setUseTypeHeaders(false);
 
         Map<String, Object> props = new HashMap<>();
-
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "user-service");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-
-        // IMPORTANT: allow event contracts package
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-
-        // Optional but good: don't require type headers
-        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-
         return new DefaultKafkaConsumerFactory<>(
                 props,
                 new StringDeserializer(),
-                new JsonDeserializer<>(Object.class)
+                deserializer
         );
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object>
+    public ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent>
     kafkaListenerContainerFactory() {
 
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+        ConcurrentKafkaListenerContainerFactory<String, UserRegisteredEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory());
-
-        // 👇 recommended for event-driven systems
-        factory.setConcurrency(3);
+        factory.setConcurrency(1); // IMPORTANT while debugging
 
         return factory;
     }

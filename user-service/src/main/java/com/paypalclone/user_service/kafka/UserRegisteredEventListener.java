@@ -23,7 +23,8 @@ public class UserRegisteredEventListener {
 
     @KafkaListener(
             topics = "auth.user.registered",
-            groupId = "user-service"
+            groupId = "user-service",
+            containerFactory = "kafkaListenerContainerFactory"
     )
     public void handle(UserRegisteredEvent event) {
 

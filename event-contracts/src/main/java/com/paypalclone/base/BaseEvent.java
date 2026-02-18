@@ -1,5 +1,6 @@
 package com.paypalclone.base;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
@@ -11,24 +12,17 @@ import java.util.UUID;
 @SuperBuilder
 public abstract class BaseEvent {
 
-    @JsonProperty("event_id")
     private final String eventId;
-
-    @JsonProperty("event_type")
     private final String eventType;
-
-    @JsonProperty("event_version")
     private final int eventVersion;
-
-    @JsonProperty("occurred_at")
     private final Instant occurredAt;
 
-    // Lombok will use this
+    @JsonCreator
     protected BaseEvent(
-            String eventId,
-            String eventType,
-            int eventVersion,
-            Instant occurredAt
+            @JsonProperty("event_id") String eventId,
+            @JsonProperty("event_type") String eventType,
+            @JsonProperty("event_version") int eventVersion,
+            @JsonProperty("occurred_at") Instant occurredAt
     ) {
         this.eventId = eventId != null ? eventId : UUID.randomUUID().toString();
         this.eventType = eventType;
