@@ -50,7 +50,32 @@ public class UserComplianceServiceImpl implements UserComplianceService {
     }
 
     @Override
-    public void updateRiskState(String externalAuthId, RiskState riskState) {
+    public void updateRiskState(String externalAuthId, RiskState newState) {
 
+
+        log.info("Risk state update  requested: authUserId={}, newState={}",
+                externalAuthId, newState);
+
+        User user = userRepository.findByExternalAuthId(externalAuthId)
+                .orElseThrow(()-> {
+                    log.warn("User not found for risk update: authUserId={}",externalAuthId);
+                    throw new UserNotFoundException(Long.valueOf(externalAuthId));
+                });
+
+        // Idempotency
+        if(user.getRiskState()== newState){
+            log.info("Risk state already={}, skipping update for authUserId={}",
+                    newState, externalAuthId);
+            return;
+        }
+
+        user.setRiskState(newState);
+        userRepository.save(user);
+
+        log.info("Risk state updated successfully: authUserId={}, state={}",
+                externalAuthId, newState);
+
+
+        // TODO  -> emit UserRiskUpdatedEvent
     }
 }
