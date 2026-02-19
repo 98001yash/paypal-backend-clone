@@ -50,6 +50,14 @@ spring:
             - InternalServiceFilter
 
 
+        - id: merchant-service
+          uri: lb://MERCHANT-SERVICE
+          predicates:
+            - Path=/merchant/**
+          filters:
+            - AuthenticationFilter
+
+
 jwt:
   secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
   issuer: auth-service
