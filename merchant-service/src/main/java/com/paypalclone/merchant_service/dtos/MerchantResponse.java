@@ -11,25 +11,25 @@ import java.time.Instant;
     @AllArgsConstructor
     public class MerchantResponse {
 
-        private Long merchantId;
-        private String userId;
-        private String businessName;
-        private String businessType;
-        private String country;
-        private MerchantStatus status;
-        private Instant createdAt;
-        private Instant updatedAt;
+    private Long merchantId;
+    private Long userId;
+    private String businessName;
+    private String businessType;
+    private String country;
+    private MerchantStatus status;
+    private Instant createdAt;
+    private Instant updatedAt;
 
-        public static MerchantResponse from(Merchant merchant) {
-            return new MerchantResponse(
-                    merchant.getMerchantId(),
-                    merchant.getUserId(),
-                    merchant.getBusinessName(),
-                    merchant.getBusinessType(),
-                    merchant.getCountry(),
-                    merchant.getStatus(),
-                    merchant.getCreatedAt(),
-                    merchant.getUpdatedAt()
-            );
-        }
+    public static MerchantResponse from(Merchant merchant) {
+        return new MerchantResponse(
+                merchant.getMerchantId(),
+                merchant.getUserId(),
+                merchant.getBusinessName(),
+                merchant.getBusinessType(),
+                merchant.getCountry(),
+                merchant.getStatus(),
+                merchant.getCreatedAt(),
+                merchant.getUpdatedAt()
+        );
+    }
 }

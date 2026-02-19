@@ -25,7 +25,7 @@ public class Merchant {
     private Long merchantId;
 
     @Column(name = "user_id", nullable = false, updatable = false)
-    private String userId;
+    private Long userId;
 
     @Column(name = "business_name", nullable = false)
     private String businessName;
@@ -48,7 +48,7 @@ public class Merchant {
 
 
     private Merchant(
-            String userId,
+            Long userId,
             String businessName,
             String businessType,
             String country
@@ -64,7 +64,7 @@ public class Merchant {
 
 
     public static Merchant create(
-            String userId,
+            Long userId,
             String businessName,
             String businessType,
             String country
