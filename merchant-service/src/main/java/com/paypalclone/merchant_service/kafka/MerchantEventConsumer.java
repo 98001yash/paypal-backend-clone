@@ -1,6 +1,11 @@
 package com.paypalclone.merchant_service.kafka;
 
+import com.paypalclone.merchant.MerchantActivatedEvent;
+import com.paypalclone.merchant.MerchantLimitedEvent;
+import com.paypalclone.merchant.MerchantRejectedEvent;
+import com.paypalclone.merchant.MerchantSuspendedEvent;
 import com.paypalclone.merchant_service.entity.Merchant;
+import com.paypalclone.merchant_service.enums.MerchantStatus;
 import com.paypalclone.merchant_service.repository.MerchantRepository;
 import com.paypalclone.user.UserKycUpdatedEvent;
 import com.paypalclone.user.UserRiskUpdatedEvent;
@@ -17,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MerchantEventConsumer {
 
     private final MerchantRepository merchantRepository;
+    private final MerchantEventPublisher merchantEventPublisher;
 
 
     // KYC EVENTS
@@ -78,5 +84,68 @@ public class MerchantEventConsumer {
                 || merchant.getStatus().name().equals("LIMITED")) {
             merchant.activate();
         }
+    }
+
+
+    // =========================
+    private void publishIfChanged(Merchant merchant, MerchantStatus before) {
+
+        if (before == merchant.getStatus()) {
+            return; // 🔒 NO duplicate events
+        }
+
+        switch (merchant.getStatus()) {
+
+            case ACTIVE -> merchantEventPublisher.publish(
+                    KafkaTopics.MERCHANT_ACTIVATED,
+                    merchant.getUserId().toString(),
+                    MerchantActivatedEvent.builder()
+                            .eventType("MERCHANT_ACTIVATED")
+                            .eventVersion(1)
+                            .merchantId(merchant.getMerchantId())
+                            .userId(merchant.getUserId())
+                            .build()
+            );
+
+            case LIMITED -> merchantEventPublisher.publish(
+                    KafkaTopics.MERCHANT_LIMITED,
+                    merchant.getUserId().toString(),
+                    MerchantLimitedEvent.builder()
+                            .eventType("MERCHANT_LIMITED")
+                            .eventVersion(1)
+                            .merchantId(merchant.getMerchantId())
+                            .userId(merchant.getUserId())
+                            .build()
+            );
+
+            case SUSPENDED -> merchantEventPublisher.publish(
+                    KafkaTopics.MERCHANT_SUSPENDED,
+                    merchant.getUserId().toString(),
+                    MerchantSuspendedEvent.builder()
+                            .eventType("MERCHANT_SUSPENDED")
+                            .eventVersion(1)
+                            .merchantId(merchant.getMerchantId())
+                            .userId(merchant.getUserId())
+                            .build()
+            );
+
+            case REJECTED -> merchantEventPublisher.publish(
+                    KafkaTopics.MERCHANT_REJECTED,
+                    merchant.getUserId().toString(),
+                    MerchantRejectedEvent.builder()
+                            .eventType("MERCHANT_REJECTED")
+                            .eventVersion(1)
+                            .merchantId(merchant.getMerchantId())
+                            .userId(merchant.getUserId())
+                            .build()
+            );
+        }
+
+        log.info(
+                "Merchant lifecycle changed: merchantId={}, {} -> {}",
+                merchant.getMerchantId(),
+                before,
+                merchant.getStatus()
+        );
     }
 }
