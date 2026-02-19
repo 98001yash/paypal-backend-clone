@@ -58,6 +58,14 @@ spring:
             - AuthenticationFilter
 
 
+        - id: account-service
+          uri: lb://ACCOUNT-SERVICE
+          predicates:
+            - Path=/accounts/**
+          filters:
+            - AuthenticationFilter
+
+
 jwt:
   secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
   issuer: auth-service
