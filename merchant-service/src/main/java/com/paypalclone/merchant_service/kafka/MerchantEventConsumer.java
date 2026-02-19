@@ -2,7 +2,6 @@ package com.paypalclone.merchant_service.kafka;
 
 import com.paypalclone.merchant_service.entity.Merchant;
 import com.paypalclone.merchant_service.repository.MerchantRepository;
-
 import com.paypalclone.user.UserKycUpdatedEvent;
 import com.paypalclone.user.UserRiskUpdatedEvent;
 import lombok.RequiredArgsConstructor;
