@@ -47,6 +47,7 @@
         <module>event-contracts</module>
         <module>api-gateway</module>
         <module>user-service</module>
+        <module>merchant-service</module>
     </modules>
 
 </project>
