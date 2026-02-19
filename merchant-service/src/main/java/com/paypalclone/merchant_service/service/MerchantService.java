@@ -1,10 +1,10 @@
 package com.paypalclone.merchant_service.service;
 
+import com.paypalclone.merchant.MerchantCreatedEvent;
 import com.paypalclone.merchant_service.entity.Merchant;
 import com.paypalclone.merchant_service.kafka.KafkaTopics;
 import com.paypalclone.merchant_service.kafka.MerchantEventPublisher;
 import com.paypalclone.merchant_service.repository.MerchantRepository;
-import com.paypalclone.merchant.MerchantCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,20 +18,19 @@ public class MerchantService {
     private final MerchantRepository merchantRepository;
     private final MerchantEventPublisher merchantEventPublisher;
 
-
     @Transactional
     public Merchant createMerchant(
-            Long userId,
+            Long internalUserId,
             String businessName,
             String businessType,
             String country
     ) {
 
-        return merchantRepository.findByUserId(userId)
+        return merchantRepository.findByUserId(internalUserId)
                 .orElseGet(() -> {
 
                     Merchant merchant = Merchant.create(
-                            userId,
+                            internalUserId,
                             businessName,
                             businessType,
                             country
@@ -40,7 +39,7 @@ public class MerchantService {
                     merchantRepository.save(merchant);
 
                     log.info(
-                            "Merchant created: merchantId={}, userId={}",
+                            "Merchant created: merchantId={}, internalUserId={}",
                             merchant.getMerchantId(),
                             merchant.getUserId()
                     );
@@ -66,11 +65,11 @@ public class MerchantService {
     }
 
     @Transactional(readOnly = true)
-    public Merchant getMerchantForUser(Long userId) {
-        return merchantRepository.findByUserId(userId)
+    public Merchant getMerchantForUser(Long internalUserId) {
+        return merchantRepository.findByUserId(internalUserId)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Merchant not found for user " + userId
+                                "Merchant not found for user " + internalUserId
                         )
                 );
     }

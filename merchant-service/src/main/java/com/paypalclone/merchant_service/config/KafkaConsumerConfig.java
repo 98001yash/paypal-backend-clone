@@ -1,5 +1,6 @@
 package com.paypalclone.merchant_service.config;
 
+import com.paypalclone.auth.UserRegisteredEvent;
 import com.paypalclone.user.UserKycUpdatedEvent;
 import com.paypalclone.user.UserRiskUpdatedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -88,4 +89,6 @@ public class KafkaConsumerConfig {
 
         return factory;
     }
+
+
 }

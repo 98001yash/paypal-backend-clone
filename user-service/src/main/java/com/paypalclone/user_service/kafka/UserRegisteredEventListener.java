@@ -1,7 +1,7 @@
 package com.paypalclone.user_service.kafka;
 
-
 import com.paypalclone.auth.UserRegisteredEvent;
+import com.paypalclone.user.UserCreatedEvent;
 import com.paypalclone.user_service.entity.User;
 import com.paypalclone.user_service.enums.KycLevel;
 import com.paypalclone.user_service.enums.RiskState;
@@ -12,27 +12,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserRegisteredEventListener {
 
-
     private final UserRepository userRepository;
+    private final EventPublisher eventPublisher;
 
     @KafkaListener(
             topics = "auth.user.registered",
             groupId = "user-service",
             containerFactory = "kafkaListenerContainerFactory"
     )
+    @Transactional
     public void handle(UserRegisteredEvent event) {
 
-        log.info("Received UserRegisteredEvent for authUserId={}", event.getUserId());
-
-        //  Idempotency check (CRITICAL)
         if (userRepository.existsByExternalAuthId(event.getUserId().toString())) {
-            log.warn("User already exists for authUserId={}, ignoring event", event.getUserId());
             return;
         }
 
@@ -45,6 +43,26 @@ public class UserRegisteredEventListener {
         user.setRiskState(RiskState.NORMAL);
 
         userRepository.save(user);
-        log.info("User created in User Service for authUserId={}", event.getUserId());
+
+        log.info(
+                "User created in user-service: authId={}, internalUserId={}",
+                event.getUserId(),
+                user.getId()
+        );
+
+        // 🔥 PUBLISH UserCreatedEvent
+        UserCreatedEvent createdEvent =
+                UserCreatedEvent.builder()
+                        .eventType("USER_CREATED")
+                        .eventVersion(1)
+                        .userId(user.getId())
+                        .externalAuthId(user.getExternalAuthId())
+                        .build();
+
+        eventPublisher.publish(
+                "user.user.created",
+                user.getId().toString(),
+                createdEvent
+        );
     }
 }

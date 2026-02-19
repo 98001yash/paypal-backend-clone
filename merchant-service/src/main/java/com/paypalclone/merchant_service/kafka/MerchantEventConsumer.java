@@ -15,7 +15,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,8 +23,10 @@ public class MerchantEventConsumer {
     private final MerchantRepository merchantRepository;
     private final MerchantEventPublisher merchantEventPublisher;
 
-
+    // =========================
     // KYC EVENTS
+    // =========================
+
     @KafkaListener(
             topics = "user.user.kyc-updated",
             containerFactory = "userKycKafkaListenerContainerFactory"
@@ -41,14 +42,23 @@ public class MerchantEventConsumer {
 
         merchantRepository.findByUserId(event.getUserId())
                 .ifPresent(merchant -> {
+
+                    MerchantStatus before = merchant.getStatus(); // ✅ capture state
+
                     switch (event.getNewLevel()) {
                         case FULL -> activateIfAllowed(merchant);
                         case NONE, BASIC -> {
-                            // do nothing → merchant remains PENDING / LIMITED
+                            // no state change
                         }
                     }
+
+                    publishIfChanged(merchant, before); // ✅ emit lifecycle event
                 });
     }
+
+    // =========================
+    // RISK EVENTS
+    // =========================
 
     @KafkaListener(
             topics = "user.user.risk-updated",
@@ -65,33 +75,43 @@ public class MerchantEventConsumer {
 
         merchantRepository.findByUserId(event.getUserId())
                 .ifPresent(merchant -> {
+
+                    MerchantStatus before = merchant.getStatus(); // ✅ capture state
+
                     switch (event.getNewState()) {
                         case NORMAL -> activateIfAllowed(merchant);
                         case UNDER_REVIEW -> merchant.limit();
                         case HIGH_RISK, FROZEN -> merchant.suspend();
                     }
+
+                    publishIfChanged(merchant, before); // ✅ emit lifecycle event
                 });
     }
 
+    // =========================
+    // INTERNAL RULES
+    // =========================
 
-
-
-    // INTERNAL RULE
     private void activateIfAllowed(Merchant merchant) {
-        if (merchant.getStatus() == null) return;
 
-        if (merchant.getStatus().name().equals("PENDING")
-                || merchant.getStatus().name().equals("LIMITED")) {
+        if (merchant.getStatus() == null) {
+            return;
+        }
+
+        if (merchant.getStatus() == MerchantStatus.PENDING
+                || merchant.getStatus() == MerchantStatus.LIMITED) {
             merchant.activate();
         }
     }
 
-
     // =========================
+    // EVENT EMISSION (GUARDED)
+    // =========================
+
     private void publishIfChanged(Merchant merchant, MerchantStatus before) {
 
         if (before == merchant.getStatus()) {
-            return; // 🔒 NO duplicate events
+            return; // 🔒 no duplicate events
         }
 
         switch (merchant.getStatus()) {
