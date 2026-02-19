@@ -108,4 +108,27 @@ public class AccountServiceImpl implements AccountService {
     public List<Account> getAccountsForOwner(Long ownerId) {
         return accountRepository.findAllByOwnerId(ownerId);
     }
+
+
+    @Override
+    public void closeAccount(Long ownerId, AccountType accountType) {
+
+        Account account = accountRepository
+                .findByOwnerIdAndAccountType(ownerId, accountType)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Account not found for ownerId=" + ownerId +
+                                        ", type=" + accountType
+                        )
+                );
+
+        account.close();
+        log.info(
+                "Account closed: accountId={}, ownerId={}, type={}",
+                account.getAccountId(),
+                ownerId,
+                accountType
+        );
+    }
+
 }

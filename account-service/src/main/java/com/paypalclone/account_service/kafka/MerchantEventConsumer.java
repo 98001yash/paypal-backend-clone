@@ -1,10 +1,8 @@
 package com.paypalclone.account_service.kafka;
 
-import com.paypalclone.merchant.MerchantActivatedEvent;
-import com.paypalclone.merchant.MerchantCreatedEvent;
-import com.paypalclone.merchant.MerchantLimitedEvent;
-import com.paypalclone.merchant.MerchantRejectedEvent;
-import com.paypalclone.merchant.MerchantSuspendedEvent;
+import com.paypalclone.account_service.enums.AccountType;
+import com.paypalclone.account_service.service.AccountService;
+import com.paypalclone.merchant.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MerchantEventConsumer {
 
-    // later: AccountRepository
+    private final AccountService accountService;
 
-    // 1️MERCHANT CREATED
+    // =====================================================
+    // 1️⃣ MERCHANT CREATED
+    // =====================================================
     @KafkaListener(
             topics = "merchant.merchant.created",
             groupId = "account-service",
@@ -33,13 +33,21 @@ public class MerchantEventConsumer {
                 event.getUserId()
         );
 
-        // TODO:
-        // - idempotency
-        // - create merchant wallet
-        // - create settlement account
+        // Create merchant accounts (IDEMPOTENT)
+        accountService.createAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_WALLET
+        );
+
+        accountService.createAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_SETTLEMENT
+        );
     }
 
-    // 2️ MERCHANT ACTIVATED
+    // =====================================================
+    // 2️⃣ MERCHANT ACTIVATED
+    // =====================================================
     @KafkaListener(
             topics = "merchant.merchant.activated",
             groupId = "account-service",
@@ -53,11 +61,20 @@ public class MerchantEventConsumer {
                 event.getMerchantId()
         );
 
-        // TODO:
-        // - activate all merchant accounts
+        accountService.activateAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_WALLET
+        );
+
+        accountService.activateAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_SETTLEMENT
+        );
     }
 
-    // 3️ MERCHANT LIMITED
+    // =====================================================
+    // 3️⃣ MERCHANT LIMITED
+    // =====================================================
     @KafkaListener(
             topics = "merchant.merchant.limited",
             groupId = "account-service",
@@ -71,9 +88,13 @@ public class MerchantEventConsumer {
                 event.getMerchantId()
         );
 
-        // TODO:
-        // - limit merchant wallet
+        // Limit = suspend wallet only
+        accountService.suspendAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_WALLET
+        );
     }
+
 
     // 4️ MERCHANT SUSPENDED
     @KafkaListener(
@@ -89,9 +110,17 @@ public class MerchantEventConsumer {
                 event.getMerchantId()
         );
 
-        // TODO:
-        // - suspend all merchant accounts
+        accountService.suspendAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_WALLET
+        );
+
+        accountService.suspendAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_SETTLEMENT
+        );
     }
+
 
     // 5️ MERCHANT REJECTED
     @KafkaListener(
@@ -107,7 +136,14 @@ public class MerchantEventConsumer {
                 event.getMerchantId()
         );
 
-        // TODO:
-        // - close all merchant accounts (NO delete)
+        accountService.closeAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_WALLET
+        );
+
+        accountService.closeAccount(
+                event.getMerchantId(),
+                AccountType.MERCHANT_SETTLEMENT
+        );
     }
 }

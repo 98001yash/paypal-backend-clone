@@ -1,5 +1,7 @@
 package com.paypalclone.account_service.kafka;
 
+import com.paypalclone.account_service.enums.AccountType;
+import com.paypalclone.account_service.service.AccountService;
 import com.paypalclone.user.UserCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserEventConsumer {
 
-    // later: AccountRepository / WalletRepository
+    private final AccountService accountService;
 
     @KafkaListener(
             topics = "user.user.created",
@@ -28,8 +30,10 @@ public class UserEventConsumer {
                 event.getExternalAuthId()
         );
 
-        // TODO (next step):
-        // - idempotency check
-        // - create USER wallet
+        //  Create USER wallet (idempotent inside service)
+        accountService.createAccount(
+                event.getUserId(),
+                AccountType.USER_WALLET
+        );
     }
 }
