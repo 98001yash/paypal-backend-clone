@@ -60,6 +60,7 @@ public class UserComplianceServiceImpl implements UserComplianceService {
         UserKycUpdatedEvent event = UserKycUpdatedEvent.builder()
                 .eventType("USER_KYC_UPDATED")
                 .eventVersion(1)
+                .userId(user.getId())                    //  ADD
                 .externalAuthId(externalAuthId)
                 .oldLevel(eventOldLevel)
                 .newLevel(eventNewLevel)
@@ -67,7 +68,7 @@ public class UserComplianceServiceImpl implements UserComplianceService {
 
         eventPublisher.publish(
                 KafkaTopics.USER_KYC_UPDATED,
-                externalAuthId,
+                user.getId().toString(),
                 event
         );
     }
@@ -109,6 +110,7 @@ public class UserComplianceServiceImpl implements UserComplianceService {
         UserRiskUpdatedEvent event = UserRiskUpdatedEvent.builder()
                 .eventType("USER_RISK_UPDATED")
                 .eventVersion(1)
+                .userId(user.getId())                    //  ADD
                 .externalAuthId(externalAuthId)
                 .oldState(eventOldState)
                 .newState(eventNewState)
@@ -116,7 +118,7 @@ public class UserComplianceServiceImpl implements UserComplianceService {
 
         eventPublisher.publish(
                 KafkaTopics.USER_RISK_UPDATED,
-                externalAuthId,
+                user.getId().toString(),
                 event
         );
     }

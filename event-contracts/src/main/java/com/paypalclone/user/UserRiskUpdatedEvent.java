@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class UserRiskUpdatedEvent extends BaseEvent {
 
+    private final Long userId;
     private final String externalAuthId;
     private final RiskState oldState;
     private final RiskState newState;

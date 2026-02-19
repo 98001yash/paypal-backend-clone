@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class UserKycUpdatedEvent extends BaseEvent {
 
+    private final Long userId;
     private final String externalAuthId;
     private final KycLevel oldLevel;
     private final KycLevel newLevel;
