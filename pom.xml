@@ -48,6 +48,8 @@
         <module>api-gateway</module>
         <module>user-service</module>
         <module>merchant-service</module>
+        <module>account-service</module>
     </modules>
+
 
 </project>
