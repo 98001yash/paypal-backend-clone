@@ -14,5 +14,5 @@ public interface AccountService {
 
     void suspendAccount(Long ownerId, AccountType accountType);
 
-    List<Account>  getAccountForOwner(Long ownerId);
+    List<Account>  getAccountsForOwner(Long ownerId);
 }
