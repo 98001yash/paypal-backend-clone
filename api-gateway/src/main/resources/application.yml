@@ -66,6 +66,14 @@ spring:
             - AuthenticationFilter
 
 
+        - id: ledger-service
+          uri: lb://LEDGER-SERVICE
+          predicates:
+            - Path=/ledger/**
+          filters:
+            - AuthenticationFilter
+
+
 jwt:
   secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
   issuer: auth-service
