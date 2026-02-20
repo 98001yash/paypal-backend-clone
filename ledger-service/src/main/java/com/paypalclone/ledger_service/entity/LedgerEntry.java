@@ -16,11 +16,9 @@ public class LedgerEntry {
     private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ledger_transaction_id", nullable = false)
     private LedgerTransaction transaction;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ledger_account_id", nullable = false)
     private LedgerAccount account;
 
     @Enumerated(EnumType.STRING)
@@ -38,11 +36,11 @@ public class LedgerEntry {
 
     protected LedgerEntry() {}
 
-    public LedgerEntry(LedgerTransaction transaction,
-                       LedgerAccount account,
-                       LedgerEntryType entryType,
-                       BigDecimal amount,
-                       String currency) {
+    private LedgerEntry(LedgerTransaction transaction,
+                        LedgerAccount account,
+                        LedgerEntryType entryType,
+                        BigDecimal amount,
+                        String currency) {
 
         if (amount.signum() <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
@@ -53,5 +51,19 @@ public class LedgerEntry {
         this.entryType = entryType;
         this.amount = amount;
         this.currency = currency;
+    }
+
+    public static LedgerEntry debit(LedgerTransaction tx,
+                                    LedgerAccount account,
+                                    BigDecimal amount,
+                                    String currency) {
+        return new LedgerEntry(tx, account, LedgerEntryType.DEBIT, amount, currency);
+    }
+
+    public static LedgerEntry credit(LedgerTransaction tx,
+                                     LedgerAccount account,
+                                     BigDecimal amount,
+                                     String currency) {
+        return new LedgerEntry(tx, account, LedgerEntryType.CREDIT, amount, currency);
     }
 }

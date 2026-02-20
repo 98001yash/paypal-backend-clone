@@ -8,27 +8,25 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "ledger_transactions", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"idempotency_key"})
-})
+@Table(
+        name = "ledger_transactions",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"idempotency_key"})
+        }
+)
 public class LedgerTransaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Column(name = "idempotency_key", nullable = false, unique = true)
     private String idempotencyKey;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private LedgerTransactionType type;
-
-    @Column(name = "reference_type", nullable = false)
     private String referenceType;
 
-    @Column(name = "reference_id", nullable = false)
+    @Column(nullable = false)
     private String referenceId;
 
     @Enumerated(EnumType.STRING)
@@ -40,15 +38,19 @@ public class LedgerTransaction {
 
     protected LedgerTransaction() {}
 
-    public LedgerTransaction(String idempotencyKey,
-                             LedgerTransactionType type,
-                             String referenceType,
-                             String referenceId) {
+    private LedgerTransaction(String idempotencyKey,
+                              String referenceType,
+                              String referenceId) {
         this.idempotencyKey = idempotencyKey;
-        this.type = type;
         this.referenceType = referenceType;
         this.referenceId = referenceId;
         this.status = LedgerTransactionStatus.PENDING;
+    }
+
+    public static LedgerTransaction create(String idempotencyKey,
+                                           String referenceType,
+                                           String referenceId) {
+        return new LedgerTransaction(idempotencyKey, referenceType, referenceId);
     }
 
     public void markPosted() {
