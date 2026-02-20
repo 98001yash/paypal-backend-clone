@@ -1,6 +1,6 @@
 package com.paypalclone.account;
 
-import com.paypalclone.base.BaseAccountEvent;
+import com.paypalclone.base.BaseEvent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +10,10 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountClosedEvent extends BaseAccountEvent {
+public class AccountClosedEvent extends BaseEvent {
+
+    private Long accountId;
+    private Long ownerId;
+    private String accountType;
 }
 
