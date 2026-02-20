@@ -3,8 +3,11 @@ package com.paypalclone.account_service.service.Impl;
 import com.paypalclone.account_service.entity.Account;
 import com.paypalclone.account_service.enums.AccountStatus;
 import com.paypalclone.account_service.enums.AccountType;
+import com.paypalclone.account_service.kafka.AccountEventPublisher;
+import com.paypalclone.account_service.kafka.KafkaTopics;
 import com.paypalclone.account_service.repository.AccountRepository;
 import com.paypalclone.account_service.service.AccountService;
+import com.paypalclone.account.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,13 +22,11 @@ import java.util.List;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
-
-
+    private final AccountEventPublisher eventPublisher;
 
     @Override
     public Account createAccount(Long ownerId, AccountType accountType) {
 
-        //  Idempotency (CRITICAL)
         return accountRepository
                 .findByOwnerIdAndAccountType(ownerId, accountType)
                 .orElseGet(() -> {
@@ -40,10 +41,21 @@ public class AccountServiceImpl implements AccountService {
                             accountType
                     );
 
+                    eventPublisher.publish(
+                            KafkaTopics.ACCOUNT_CREATED,
+                            account.getAccountId().toString(),
+                            AccountCreatedEvent.builder()
+                                    .eventType("ACCOUNT_CREATED")
+                                    .eventVersion(1)
+                                    .accountId(account.getAccountId())
+                                    .ownerId(account.getOwnerId())
+                                    .accountType(account.getAccountType().name())
+                                    .build()
+                    );
+
                     return account;
                 });
     }
-
 
     @Override
     public void activateAccount(Long ownerId, AccountType accountType) {
@@ -56,6 +68,7 @@ public class AccountServiceImpl implements AccountService {
                                         ", type=" + accountType
                         )
                 );
+
         if (account.getStatus() == AccountStatus.ACTIVE) {
             log.info(
                     "Account already ACTIVE: ownerId={}, type={}",
@@ -64,12 +77,26 @@ public class AccountServiceImpl implements AccountService {
             );
             return;
         }
+
         account.activate();
+
         log.info(
                 "Account activated: accountId={}, ownerId={}, type={}",
                 account.getAccountId(),
                 ownerId,
                 accountType
+        );
+
+        eventPublisher.publish(
+                KafkaTopics.ACCOUNT_ACTIVATED,
+                account.getAccountId().toString(),
+                AccountActivatedEvent.builder()
+                        .eventType("ACCOUNT_ACTIVATED")
+                        .eventVersion(1)
+                        .accountId(account.getAccountId())
+                        .ownerId(account.getOwnerId())
+                        .accountType(account.getAccountType().name())
+                        .build()
         );
     }
 
@@ -85,6 +112,7 @@ public class AccountServiceImpl implements AccountService {
                                         ", type=" + accountType
                         )
                 );
+
         if (account.getStatus() == AccountStatus.SUSPENDED) {
             log.info(
                     "Account already SUSPENDED: ownerId={}, type={}",
@@ -93,22 +121,28 @@ public class AccountServiceImpl implements AccountService {
             );
             return;
         }
+
         account.suspend();
+
         log.info(
                 "Account suspended: accountId={}, ownerId={}, type={}",
                 account.getAccountId(),
                 ownerId,
                 accountType
         );
+
+        eventPublisher.publish(
+                KafkaTopics.ACCOUNT_SUSPENDED,
+                account.getAccountId().toString(),
+                AccountSuspendedEvent.builder()
+                        .eventType("ACCOUNT_SUSPENDED")
+                        .eventVersion(1)
+                        .accountId(account.getAccountId())
+                        .ownerId(account.getOwnerId())
+                        .accountType(account.getAccountType().name())
+                        .build()
+        );
     }
-
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Account> getAccountsForOwner(Long ownerId) {
-        return accountRepository.findAllByOwnerId(ownerId);
-    }
-
 
     @Override
     public void closeAccount(Long ownerId, AccountType accountType) {
@@ -123,12 +157,30 @@ public class AccountServiceImpl implements AccountService {
                 );
 
         account.close();
+
         log.info(
                 "Account closed: accountId={}, ownerId={}, type={}",
                 account.getAccountId(),
                 ownerId,
                 accountType
         );
+
+        eventPublisher.publish(
+                KafkaTopics.ACCOUNT_CLOSED,
+                account.getAccountId().toString(),
+                AccountClosedEvent.builder()
+                        .eventType("ACCOUNT_CLOSED")
+                        .eventVersion(1)
+                        .accountId(account.getAccountId())
+                        .ownerId(account.getOwnerId())
+                        .accountType(account.getAccountType().name())
+                        .build()
+        );
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Account> getAccountsForOwner(Long ownerId) {
+        return accountRepository.findAllByOwnerId(ownerId);
+    }
 }
