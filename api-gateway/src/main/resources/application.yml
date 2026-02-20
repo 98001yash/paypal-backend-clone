@@ -74,6 +74,14 @@ spring:
             - AuthenticationFilter
 
 
+        - id: balance-projection-service
+          uri: lb://BALANCE-PROJECTION-SERVICE
+          predicates:
+            - Path=/balances/**
+          filters:
+            - AuthenticationFilter
+
+
 jwt:
   secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
   issuer: auth-service
