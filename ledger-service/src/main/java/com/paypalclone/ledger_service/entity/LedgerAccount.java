@@ -1,32 +1,29 @@
 package com.paypalclone.ledger_service.entity;
 
-
 import com.paypalclone.ledger_service.enums.LedgerAccountStatus;
 import com.paypalclone.ledger_service.enums.LedgerAccountType;
 import jakarta.persistence.*;
 
 import java.time.Instant;
-
-
 @Entity
-@Table(name = "ledger_accounts", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"external_account_id", "currency"})
-})
+@Table(
+        name = "ledger_accounts",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"external_account_id"})
+        }
+)
 public class LedgerAccount {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "external_account_id", nullable = false)
+    @Column(name = "external_account_id", nullable = false, unique = true)
     private Long externalAccountId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LedgerAccountType type;
-
-    @Column(nullable = false, length = 3)
-    private String currency;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -37,25 +34,20 @@ public class LedgerAccount {
 
     protected LedgerAccount() {}
 
-    public LedgerAccount(Long externalAccountId,
-                         LedgerAccountType type,
-                         String currency) {
+    private LedgerAccount(Long externalAccountId,
+                          LedgerAccountType type) {
         this.externalAccountId = externalAccountId;
         this.type = type;
-        this.currency = currency;
         this.status = LedgerAccountStatus.ACTIVE;
     }
 
-    public Long getId() {
-        return id;
+    public static LedgerAccount create(Long externalAccountId,
+                                       LedgerAccountType type) {
+        return new LedgerAccount(externalAccountId, type);
     }
 
-    public Long getExternalAccountId() {
-        return externalAccountId;
-    }
-
-    public LedgerAccountStatus getStatus() {
-        return status;
+    public void activate() {
+        this.status = LedgerAccountStatus.ACTIVE;
     }
 
     public void block() {

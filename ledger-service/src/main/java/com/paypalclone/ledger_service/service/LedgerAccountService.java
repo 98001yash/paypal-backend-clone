@@ -13,23 +13,45 @@ public class LedgerAccountService {
 
     private final LedgerAccountRepository repository;
 
-
     @Transactional
-    public void createLedgerAccountIfNotExists(
-            Long externalAccountId,
-            LedgerAccountType type,
-            String currency
-    ) {
-        repository.findByExternalAccountIdAndCurrency(externalAccountId, currency)
+    public void createIfNotExists(Long externalAccountId,
+                                  LedgerAccountType type) {
+
+        repository.findByExternalAccountId(externalAccountId)
                 .ifPresentOrElse(
                         acc -> {}, // idempotent no-op
                         () -> repository.save(
-                                new LedgerAccount(
+                                LedgerAccount.create(
                                         externalAccountId,
-                                        type,
-                                        currency
+                                        type
                                 )
                         )
                 );
+    }
+
+    @Transactional
+    public void activate(Long externalAccountId) {
+        repository.findByExternalAccountId(externalAccountId)
+                .ifPresent(LedgerAccount::activate);
+    }
+
+    @Transactional
+    public void block(Long externalAccountId) {
+        repository.findByExternalAccountId(externalAccountId)
+                .ifPresent(LedgerAccount::block);
+    }
+
+
+    @Transactional
+    public void suspend(Long externalAccountId) {
+        repository.findByExternalAccountId(externalAccountId)
+                .ifPresent(LedgerAccount::block);
+    }
+
+    //  account.account.closed → BLOCK
+    @Transactional
+    public void close(Long externalAccountId) {
+        repository.findByExternalAccountId(externalAccountId)
+                .ifPresent(LedgerAccount::block);
     }
 }

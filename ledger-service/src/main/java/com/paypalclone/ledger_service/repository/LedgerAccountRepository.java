@@ -8,8 +8,5 @@ import java.util.Optional;
 public interface LedgerAccountRepository extends JpaRepository<LedgerAccount,Long> {
 
 
-    Optional<LedgerAccount> findByExternalAccountIdAndCurrency(
-            Long externalAccountId,
-            String currency
-    );
+    Optional<LedgerAccount> findByExternalAccountId(Long externalAccountId);
 }

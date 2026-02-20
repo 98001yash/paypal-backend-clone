@@ -4,7 +4,7 @@ import com.paypalclone.ledger_service.enums.LedgerAccountType;
 
 public class LedgerAccountMapper {
 
-    public static LedgerAccountType mapAccountType(String accountType) {
+    public static LedgerAccountType map(String accountType) {
         return switch (accountType) {
             case "WALLET" -> LedgerAccountType.USER_WALLET;
             case "SETTLEMENT" -> LedgerAccountType.MERCHANT_SETTLEMENT;
@@ -13,4 +13,5 @@ public class LedgerAccountMapper {
             );
         };
     }
+
 }
