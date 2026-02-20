@@ -28,10 +28,11 @@ public class LedgerEventPublisher {
                         .build();
 
         kafkaTemplate.send(
-                "ledger.entry.posted",
+                KafkaTopics.LEDGER_ENTRY_POSTED,
                 event.getLedgerAccountId().toString(),
                 event
         );
+
     }
 
     public void publishTransactionCompleted(LedgerTransaction transaction) {
@@ -44,7 +45,7 @@ public class LedgerEventPublisher {
                         .build();
 
         kafkaTemplate.send(
-                "ledger.transaction.completed",
+                KafkaTopics.LEDGER_TRANSACTION_COMPLETED,
                 transaction.getId().toString(),
                 event
         );
