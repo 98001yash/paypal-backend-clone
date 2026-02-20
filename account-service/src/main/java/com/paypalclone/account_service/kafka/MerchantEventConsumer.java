@@ -22,7 +22,7 @@ public class MerchantEventConsumer {
     @KafkaListener(
             topics = "merchant.merchant.created",
             groupId = "account-service",
-            containerFactory = "merchantKafkaListenerContainerFactory"
+            containerFactory = "merchantCreatedKafkaListenerContainerFactory"
     )
     @Transactional
     public void handleMerchantCreated(MerchantCreatedEvent event) {
@@ -51,7 +51,7 @@ public class MerchantEventConsumer {
     @KafkaListener(
             topics = "merchant.merchant.activated",
             groupId = "account-service",
-            containerFactory = "merchantKafkaListenerContainerFactory"
+            containerFactory = "merchantActivatedKafkaListenerContainerFactory"
     )
     @Transactional
     public void handleMerchantActivated(MerchantActivatedEvent event) {
@@ -78,7 +78,7 @@ public class MerchantEventConsumer {
     @KafkaListener(
             topics = "merchant.merchant.limited",
             groupId = "account-service",
-            containerFactory = "merchantKafkaListenerContainerFactory"
+            containerFactory = "merchantLimitedKafkaListenerContainerFactory"
     )
     @Transactional
     public void handleMerchantLimited(MerchantLimitedEvent event) {
@@ -100,7 +100,7 @@ public class MerchantEventConsumer {
     @KafkaListener(
             topics = "merchant.merchant.suspended",
             groupId = "account-service",
-            containerFactory = "merchantKafkaListenerContainerFactory"
+            containerFactory = "merchantSuspendedKafkaListenerContainerFactory"
     )
     @Transactional
     public void handleMerchantSuspended(MerchantSuspendedEvent event) {
@@ -126,7 +126,7 @@ public class MerchantEventConsumer {
     @KafkaListener(
             topics = "merchant.merchant.rejected",
             groupId = "account-service",
-            containerFactory = "merchantKafkaListenerContainerFactory"
+            containerFactory = "merchantRejectedKafkaListenerContainerFactory"
     )
     @Transactional
     public void handleMerchantRejected(MerchantRejectedEvent event) {
