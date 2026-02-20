@@ -2,12 +2,14 @@ package com.paypalclone.ledger_service.entity;
 
 import com.paypalclone.ledger_service.enums.LedgerEntryType;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Getter
 @Table(name = "ledger_entries")
 public class LedgerEntry {
 
