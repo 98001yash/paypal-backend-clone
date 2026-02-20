@@ -40,4 +40,27 @@ public class BalanceProjection {
 
     protected BalanceProjection() {}
 
+
+
+    public void credit(BigDecimal amount) {
+        this.availableBalance = this.availableBalance.add(amount);
+    }
+
+    public void debit(BigDecimal amount) {
+        this.availableBalance = this.availableBalance.subtract(amount);
+    }
+
+    public void touch() {
+        this.updatedAt = Instant.now();
+    }
+
+
+    public BalanceProjection(Long ledgerAccountId, String currency) {
+        this.ledgerAccountId = ledgerAccountId;
+        this.currency = currency;
+        this.availableBalance = BigDecimal.ZERO;
+        this.pendingBalance = BigDecimal.ZERO;
+        this.updatedAt = Instant.now();
+    }
+
 }
