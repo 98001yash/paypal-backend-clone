@@ -50,6 +50,7 @@
         <module>merchant-service</module>
         <module>account-service</module>
         <module>ledger-service</module>
+        <module>balance-project-service</module>
     </modules>
 
 
