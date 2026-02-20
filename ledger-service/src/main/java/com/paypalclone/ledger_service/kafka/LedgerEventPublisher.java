@@ -6,12 +6,14 @@ import com.paypalclone.ledger.LedgerTransactionCompletedEvent;
 import com.paypalclone.ledger_service.entity.LedgerEntry;
 import com.paypalclone.ledger_service.entity.LedgerTransaction;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class LedgerEventPublisher {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -26,6 +28,14 @@ public class LedgerEventPublisher {
                         .amount(entry.getAmount())
                         .currency(entry.getCurrency())
                         .build();
+
+        log.info(
+                "Publishing LedgerEntryPostedEvent [txId={}, accountId={}, type={}, amount={}]",
+                event.getLedgerTransactionId(),
+                event.getLedgerAccountId(),
+                event.getEntryType(),
+                event.getAmount()
+        );
 
         kafkaTemplate.send(
                 KafkaTopics.LEDGER_ENTRY_POSTED,
@@ -43,6 +53,13 @@ public class LedgerEventPublisher {
                         .referenceType(transaction.getReferenceType())
                         .referenceId(transaction.getReferenceId())
                         .build();
+
+        log.info(
+                "Publishing LedgerTransactionCompletedEvent [txId={}, refType={}, refId={}]",
+                event.getLedgerTransactionId(),
+                event.getReferenceType(),
+                event.getReferenceId()
+        );
 
         kafkaTemplate.send(
                 KafkaTopics.LEDGER_TRANSACTION_COMPLETED,
