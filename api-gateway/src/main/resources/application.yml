@@ -82,6 +82,14 @@ spring:
             - AuthenticationFilter
 
 
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order/**
+          filters:
+            - AuthenticationFilter
+
+
 jwt:
   secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
   issuer: auth-service

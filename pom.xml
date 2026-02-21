@@ -51,6 +51,7 @@
         <module>account-service</module>
         <module>ledger-service</module>
         <module>balance-project-service</module>
+        <module>order-service</module>
     </modules>
 
 
