@@ -29,9 +29,9 @@ public class OrderLineItem {
 
     protected OrderLineItem() {}
 
-    private OrderLineItem(String productId,
-                          Integer quantity,
-                          BigDecimal unitPrice) {
+    public OrderLineItem(String productId,
+                         Integer quantity,
+                         BigDecimal unitPrice) {
 
         this.productId = productId;
         this.quantity = quantity;
