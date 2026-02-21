@@ -53,6 +53,7 @@
         <module>balance-project-service</module>
         <module>order-service</module>
         <module>payment-intent-service</module>
+        <module>payout-service</module>
     </modules>
 
 
