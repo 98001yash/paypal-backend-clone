@@ -6,6 +6,7 @@ import com.paypalclone.order_service.entity.OrderLineItem;
 import com.paypalclone.order_service.enums.OrderStatus;
 import com.paypalclone.order_service.exceptions.InvalidOrderStateException;
 import com.paypalclone.order_service.exceptions.OrderNotFoundException;
+import com.paypalclone.order_service.kafka.EventPublisher;
 import com.paypalclone.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final EventPublisher eventPublisher;
 
 
     // create a new order in CREATED state
@@ -34,6 +36,10 @@ public class OrderService {
 
         items.forEach(order::addLineItem);
         Order saved = orderRepository.save(order);
+
+
+        // kafka events
+        eventPublisher.publishOrderCreated(saved);
 
         log.info("Order created with id={}, total={}",
                 saved.getId(), saved.getTotalAmount());
@@ -55,6 +61,9 @@ public class OrderService {
             );
         }
         order.confirm();
+
+        // kafka event publisher
+        eventPublisher.publishOrderConfirmed(orderId);
         log.info("Order {} confirmed", orderId);
     }
 
