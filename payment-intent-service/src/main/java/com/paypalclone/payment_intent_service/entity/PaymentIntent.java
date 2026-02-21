@@ -27,11 +27,8 @@ public class PaymentIntent {
     @Column(name = "order_id", nullable = false, updatable = false)
     private Long orderId;
 
-    @Column(name = "buyer_id", nullable = false, updatable = false)
-    private Long buyerId;
-
-    @Column(name = "merchant_id", nullable = false, updatable = false)
-    private Long merchantId;
+    private Long buyerWalletAccountId;
+    private Long merchantWalletAccountId;
 
 
     @Column(nullable = false, precision = 19, scale = 4)
@@ -66,8 +63,8 @@ public class PaymentIntent {
 
     public static PaymentIntent create(
             Long orderId,
-            Long buyerId,
-            Long merchantId,
+            Long buyerWalletAccountId,
+            Long merchantWalletAccountId,
             BigDecimal amount,
             String currency,
             PaymentMethodType paymentMethod,
@@ -75,8 +72,8 @@ public class PaymentIntent {
     ) {
         PaymentIntent intent = new PaymentIntent();
         intent.orderId = orderId;
-        intent.buyerId = buyerId;
-        intent.merchantId = merchantId;
+        intent.buyerWalletAccountId = buyerWalletAccountId;
+        intent.merchantWalletAccountId = merchantWalletAccountId;
         intent.amount = amount;
         intent.currency = currency;
         intent.paymentMethod = paymentMethod;

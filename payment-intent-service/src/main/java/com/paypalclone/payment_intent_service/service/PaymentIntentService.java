@@ -68,14 +68,13 @@ public class PaymentIntentService {
                 );
 
         intent.authorize();
-
-        log.info(
-                "PaymentIntent {} authorized for order {}",
-                intent.getId(),
-                orderId
-        );
-
+        log.info("PaymentIntent {} authorized for order {}", intent.getId(), orderId);
         eventPublisher.publishAuthorized(intent);
+
+        // 🔥 THIS IS THE MISSING LINK
+        intent.capture();
+        log.info("PaymentIntent {} captured", intent.getId());
+        eventPublisher.publishCaptured(intent);
     }
 
 

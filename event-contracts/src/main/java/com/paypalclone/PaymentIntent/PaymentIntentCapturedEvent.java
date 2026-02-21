@@ -4,12 +4,21 @@ import com.paypalclone.base.BaseEvent;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-@SuperBuilder
+import java.math.BigDecimal;
+
+@Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentIntentCapturedEvent extends BaseEvent {
+public class PaymentIntentCapturedEvent {
 
     private Long paymentIntentId;
     private Long orderId;
+
+    // ✅ External account IDs (ledger-facing)
+    private Long debitExternalAccountId;
+    private Long creditExternalAccountId;
+
+    private BigDecimal amount;
+    private String currency;
 }

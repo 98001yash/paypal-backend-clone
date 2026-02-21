@@ -23,8 +23,8 @@ public class PaymentIntentEventPublisher {
                 PaymentIntentCreatedEvent.builder()
                         .paymentIntentId(intent.getId())
                         .orderId(intent.getOrderId())
-                        .buyerId(intent.getBuyerId())
-                        .merchantId(intent.getMerchantId())
+                        .buyerId(intent.getBuyerWalletAccountId())
+                        .merchantId(intent.getMerchantWalletAccountId())
                         .amount(intent.getAmount())
                         .currency(intent.getCurrency())
                         .build();
@@ -67,11 +67,20 @@ public class PaymentIntentEventPublisher {
                 PaymentIntentCapturedEvent.builder()
                         .paymentIntentId(intent.getId())
                         .orderId(intent.getOrderId())
+
+                        // ✅ CORRECT MAPPING
+                        .debitExternalAccountId(intent.getBuyerWalletAccountId())
+                        .creditExternalAccountId(intent.getMerchantWalletAccountId())
+
+                        .amount(intent.getAmount())
+                        .currency(intent.getCurrency())
                         .build();
 
         log.info(
-                "Publishing PaymentIntentCapturedEvent intentId={}",
-                intent.getId()
+                "Publishing PaymentIntentCapturedEvent intentId={}, debitExtAcc={}, creditExtAcc={}",
+                intent.getId(),
+                event.getDebitExternalAccountId(),
+                event.getCreditExternalAccountId()
         );
 
         kafkaTemplate.send(
