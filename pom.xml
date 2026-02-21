@@ -52,6 +52,7 @@
         <module>ledger-service</module>
         <module>balance-project-service</module>
         <module>order-service</module>
+        <module>payment-intent-service</module>
     </modules>
 
 
