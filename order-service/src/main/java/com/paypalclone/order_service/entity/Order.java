@@ -49,11 +49,11 @@ public class Order {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    protected Order() {}
+    public Order() {}
 
-    private Order(Long buyerId,
-                  Long merchantId,
-                  String currency) {
+    public Order(Long buyerId,
+                 Long merchantId,
+                 String currency) {
 
         this.buyerId = buyerId;
         this.merchantId = merchantId;
