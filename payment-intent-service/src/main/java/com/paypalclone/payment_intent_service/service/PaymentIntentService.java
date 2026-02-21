@@ -1,4 +1,4 @@
-package com.paypalclone.payment_intent_service.servive;
+package com.paypalclone.payment_intent_service.service;
 
 
 import com.paypalclone.payment_intent_service.entity.PaymentIntent;
@@ -54,11 +54,22 @@ public class PaymentIntentService {
     }
 
     @Transactional
-    public void authorize(Long intentId){
+    public void authorizeByOrderId(Long orderId) {
 
-        PaymentIntent intent = get(intentId);
+        PaymentIntent intent = repository.findByOrderId(orderId)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "PaymentIntent not found for orderId=" + orderId
+                        )
+                );
+
         intent.authorize();
-        log.info("PaymentIntent {} authorized",intentId);
+
+        log.info(
+                "PaymentIntent {} authorized for order {}",
+                intent.getId(),
+                orderId
+        );
     }
 
 
