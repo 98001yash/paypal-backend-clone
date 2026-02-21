@@ -98,7 +98,7 @@ public class PaymentIntent {
         touch();
     }
 
-    public void fail() {
+    public void fail(String reason) {
         if (status == PaymentIntentStatus.CAPTURED) {
             throw new IllegalStateException("Cannot fail a captured payment");
         }

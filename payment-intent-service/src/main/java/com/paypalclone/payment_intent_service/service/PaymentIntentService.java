@@ -3,6 +3,7 @@ package com.paypalclone.payment_intent_service.service;
 
 import com.paypalclone.payment_intent_service.entity.PaymentIntent;
 import com.paypalclone.payment_intent_service.enums.PaymentMethodType;
+import com.paypalclone.payment_intent_service.kafka.PaymentIntentEventPublisher;
 import com.paypalclone.payment_intent_service.repository.PaymentIntentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import java.util.Optional;
 public class PaymentIntentService {
 
     private final PaymentIntentRepository repository;
+    private final PaymentIntentEventPublisher eventPublisher;
 
 
     @Transactional
@@ -50,6 +52,8 @@ public class PaymentIntentService {
                 "PaymentIntent created id={} orderId={} amount={}",
                 saved.getId(), orderId, amount
         );
+
+        eventPublisher.publishCreated(intent);
         return saved;
     }
 
@@ -70,6 +74,8 @@ public class PaymentIntentService {
                 intent.getId(),
                 orderId
         );
+
+        eventPublisher.publishAuthorized(intent);
     }
 
 
@@ -79,14 +85,19 @@ public class PaymentIntentService {
         PaymentIntent intent = get(intentId);
         intent.capture();
         log.info("PaymentIntent {} captured", intentId);
+
+        // kafka
+        eventPublisher.publishCaptured(intent);
     }
 
     @Transactional
-    public void fail(Long intentId) {
+    public void fail(Long intentId, String reason) {
 
         PaymentIntent intent = get(intentId);
-        intent.fail();
+        intent.fail(reason);
         log.warn("PaymentIntent {} failed", intentId);
+
+        eventPublisher.publishFailed(intent, reason);
     }
 
     @Transactional
@@ -95,6 +106,7 @@ public class PaymentIntentService {
         PaymentIntent intent = get(intentId);
         intent.cancel();
         log.info("PaymentIntent {} cancelled", intentId);
+
     }
 
 
