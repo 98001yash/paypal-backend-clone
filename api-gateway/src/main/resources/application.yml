@@ -85,7 +85,7 @@ spring:
         - id: order-service
           uri: lb://ORDER-SERVICE
           predicates:
-            - Path=/order/**
+            - Path=/orders/**
           filters:
             - AuthenticationFilter
 
