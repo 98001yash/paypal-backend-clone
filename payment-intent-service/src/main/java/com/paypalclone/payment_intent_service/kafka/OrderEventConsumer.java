@@ -17,7 +17,6 @@ public class OrderEventConsumer {
 
     private final PaymentIntentService paymentIntentService;
 
-    // -------- ORDER CREATED --------
 
     @KafkaListener(
             topics = KafkaTopics.ORDER_CREATED,
@@ -31,7 +30,6 @@ public class OrderEventConsumer {
                 event.getBuyerId(),
                 event.getTotalAmount()
         );
-
         paymentIntentService.createIntentIfNotExists(
                 event.getOrderId(),
                 event.getBuyerId(),
@@ -43,7 +41,6 @@ public class OrderEventConsumer {
         );
     }
 
-    // -------- ORDER CONFIRMED --------
 
     @KafkaListener(
             topics = KafkaTopics.ORDER_CONFIRMED,
@@ -55,7 +52,6 @@ public class OrderEventConsumer {
                 "Received OrderConfirmedEvent orderId={}",
                 event.getOrderId()
         );
-
         paymentIntentService.authorizeByOrderId(event.getOrderId());
     }
 }
