@@ -2,7 +2,7 @@ package com.paypalclone.payout_service.auth;
 
 
 
-import com.paypalclone.payment_intent_service.auth.UserContextHolder;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

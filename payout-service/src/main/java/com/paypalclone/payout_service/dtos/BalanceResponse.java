@@ -3,10 +3,12 @@ package com.paypalclone.payout_service.dtos;
 
 
 import com.paypalclone.payout_service.entity.BalanceProjection;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Data
 public record BalanceResponse(
         Long ledgerAccountId,
         String currency,

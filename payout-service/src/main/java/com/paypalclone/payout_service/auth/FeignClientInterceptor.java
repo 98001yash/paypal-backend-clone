@@ -2,7 +2,7 @@ package com.paypalclone.payout_service.auth;
 
 
 
-import com.paypalclone.payment_intent_service.auth.UserContextHolder;
+
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.stereotype.Component;

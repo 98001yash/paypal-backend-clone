@@ -38,8 +38,8 @@ public class BalanceProjection {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    protected BalanceProjection() {}
-
+    protected BalanceProjection() {
+    }
 
 
     public void credit(BigDecimal amount) {
@@ -62,3 +62,4 @@ public class BalanceProjection {
         this.pendingBalance = BigDecimal.ZERO;
         this.updatedAt = Instant.now();
     }
+}

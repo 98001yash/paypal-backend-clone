@@ -42,6 +42,6 @@ public class PayoutEligibilityService {
 
         return repository.findById(merchantId)
                 .map(MerchantPayoutEligibility::isPayoutEnabled)
-                .orElse(false);
+                .orElse(true);
     }
 }
