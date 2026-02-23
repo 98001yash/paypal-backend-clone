@@ -16,7 +16,7 @@ public class BalanceReadClient {
             String currency
     ) {
         String url =
-                "http://balance-project-service/balances/"
+                "http://localhost:8095/balances/"
                         + ledgerAccountId
                         + "?currency="
                         + currency;

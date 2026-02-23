@@ -17,13 +17,14 @@ public class BalanceReadService {
 
     private final BalanceProjectionRepository repository;
 
-    public BalanceProjection getBalance(Long ledgerAccountId, String currency){
+    public BalanceProjection getBalance(Long ledgerAccountId, String currency) {
 
-        return repository.findByLedgerAccountIdAndCurrency(ledgerAccountId,currency)
-                .orElseThrow(()->
-                        new IllegalArgumentException("Balance not found for account: "+
-                                ledgerAccountId + "and currency "+currency));
-
+        return repository
+                .findByLedgerAccountIdAndCurrency(ledgerAccountId, currency)
+                .orElse(
+                        // 👇 SAFE fallback, NO DB WRITE
+                        new BalanceProjection(ledgerAccountId, currency)
+                );
     }
 
     public List<BalanceProjection> getAllBalance(Long ledgerAccountId){

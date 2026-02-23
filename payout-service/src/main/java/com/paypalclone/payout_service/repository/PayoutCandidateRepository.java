@@ -14,4 +14,7 @@ public interface PayoutCandidateRepository
 
     List<PayoutCandidate>
     findByStatus(PayoutCandidate.Status status);
+
+    boolean existsByPaymentIntentId(Long paymentIntentId);
+
 }

@@ -24,4 +24,7 @@ public interface PayoutRepository extends JpaRepository<Payout,Long> {
             Long merchantId,
             PayoutStatus status
     );
+
+    List<Payout> findTop100ByStatus(PayoutStatus payoutStatus);
+
 }

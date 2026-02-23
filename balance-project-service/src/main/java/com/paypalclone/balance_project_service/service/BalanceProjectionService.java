@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class BalanceProjectionService {
 
     private final BalanceProjectionRepository repository;
 
+    @Transactional
     public void applyLedgerEntry(
             Long ledgerAccountId,
             String currency,
@@ -22,35 +22,26 @@ public class BalanceProjectionService {
             BigDecimal amount
     ) {
 
-        BalanceProjection projection =
+        BalanceProjection balance =
                 repository.findByLedgerAccountIdAndCurrency(
                         ledgerAccountId,
                         currency
-                ).orElseGet(() ->
-                        createNew(ledgerAccountId, currency)
-                );
+                ).orElseGet(() -> {
+                    BalanceProjection bp =
+                            new BalanceProjection(ledgerAccountId, currency);
+                    return repository.save(bp);
+                });
 
         if ("CREDIT".equals(entryType)) {
-            projection.credit(amount);
+            balance.credit(amount);
         } else if ("DEBIT".equals(entryType)) {
-            projection.debit(amount);
+            balance.debit(amount);
         } else {
             throw new IllegalArgumentException(
-                    "Unknown ledger entry type: " + entryType
+                    "Unknown entry type: " + entryType
             );
         }
 
-        projection.touch();
-    }
-
-    private BalanceProjection createNew(
-            Long ledgerAccountId,
-            String currency
-    ) {
-        BalanceProjection projection = new BalanceProjection(
-                ledgerAccountId,
-                currency
-        );
-        return repository.save(projection);
+        balance.touch();
     }
 }

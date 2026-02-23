@@ -23,7 +23,7 @@ public class LedgerEventPublisher {
         LedgerEntryPostedEvent event =
                 LedgerEntryPostedEvent.builder()
                         .ledgerTransactionId(entry.getTransaction().getId())
-                        .ledgerAccountId(entry.getAccount().getId())
+                        .ledgerAccountId(entry.getAccount().getExternalAccountId())
                         .entryType(entry.getEntryType().name())
                         .amount(entry.getAmount())
                         .currency(entry.getCurrency())

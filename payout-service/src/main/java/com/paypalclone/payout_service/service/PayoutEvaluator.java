@@ -77,11 +77,16 @@ public class PayoutEvaluator {
                 );
 
 
-        if (balance.available().compareTo(MIN_PAYOUT) < 0) {
+        BigDecimal available =
+                balance.available() != null
+                        ? balance.available()
+                        : BigDecimal.ZERO;
+
+        if (available.compareTo(MIN_PAYOUT) < 0) {
             log.info(
                     "Balance below threshold ledgerAccountId={}, balance={}",
                     merchantLedgerAccountId,
-                    balance.available()
+                    available
             );
             return;
         }

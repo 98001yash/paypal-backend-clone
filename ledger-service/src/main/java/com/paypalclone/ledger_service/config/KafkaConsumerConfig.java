@@ -77,4 +77,5 @@ public class KafkaConsumerConfig {
     accountClosedKafkaListenerContainerFactory() {
         return ledgerFactory(AccountClosedEvent.class);
     }
+
 }

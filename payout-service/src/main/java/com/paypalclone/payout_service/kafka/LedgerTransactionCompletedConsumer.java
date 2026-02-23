@@ -26,7 +26,6 @@ public class LedgerTransactionCompletedConsumer {
             LedgerTransactionCompletedEvent event
     ) {
 
-        // Only care about PAYMENT settlements
         if (!"PAYMENT".equals(event.getReferenceType())) {
             return;
         }
@@ -34,16 +33,16 @@ public class LedgerTransactionCompletedConsumer {
         Long paymentIntentId =
                 Long.valueOf(event.getReferenceId());
 
-        // Idempotency: payout candidate already created
-        payoutCandidateRepository
-                .findByPaymentIntentId(paymentIntentId)
-                .ifPresent(pc -> {
-                    log.info(
-                            "PayoutCandidate already exists for intentId={}",
-                            paymentIntentId
-                    );
-                    return;
-                });
+        // ✅ REAL idempotency
+        if (payoutCandidateRepository
+                .existsByPaymentIntentId(paymentIntentId)) {
+
+            log.info(
+                    "PayoutCandidate already exists for intentId={}",
+                    paymentIntentId
+            );
+            return; // 🔥 THIS stops Kafka retries
+        }
 
         CapturedPayment captured =
                 capturedPaymentRepository
