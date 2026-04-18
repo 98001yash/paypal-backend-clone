@@ -1,0 +1,10 @@
+
+CREATE DATABASE IF NOT EXISTS paypal_authdb;
+CREATE DATABASE IF NOT EXISTS paypal_userdb;
+CREATE DATABASE IF NOT EXISTS paypal_merchantdb;
+CREATE DATABASE IF NOT EXISTS paypal_accountdb;
+CREATE DATABASE IF NOT EXISTS paypal_ledgerdb;
+CREATE DATABASE IF NOT EXISTS paypal_projectiondb;
+CREATE DATABASE IF NOT EXISTS paypal_orderdb;
+CREATE DATABASE IF NOT EXISTS paypal_payment_intentdb;
+CREATE DATABASE IF NOT EXISTS paypal_payoutdb;
