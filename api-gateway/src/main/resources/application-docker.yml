@@ -1,0 +1,101 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:3000
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+      routes:
+
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+          filters:
+            - AuthenticationFilter
+
+        - id: user-service-internal
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/internal/**
+          filters:
+            - InternalServiceFilter
+
+        - id: merchant-service
+          uri: lb://MERCHANT-SERVICE
+          predicates:
+            - Path=/merchants/**
+          filters:
+            - AuthenticationFilter
+
+        - id: account-service
+          uri: lb://ACCOUNT-SERVICE
+          predicates:
+            - Path=/accounts/**
+          filters:
+            - AuthenticationFilter
+
+        - id: ledger-service
+          uri: lb://LEDGER-SERVICE
+          predicates:
+            - Path=/ledger/**
+          filters:
+            - AuthenticationFilter
+
+        - id: balance-projection-service
+          uri: lb://BALANCE-PROJECTION-SERVICE
+          predicates:
+            - Path=/balances/**
+          filters:
+            - AuthenticationFilter
+
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/orders/**
+          filters:
+            - AuthenticationFilter
+
+jwt:
+  secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
+  issuer: auth-service
+  audience: paypal-backend
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
