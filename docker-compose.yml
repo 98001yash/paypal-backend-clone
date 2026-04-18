@@ -2,10 +2,10 @@ version: "3.9"
 
 services:
 
-
   mysql:
     image: mysql:8
     container_name: paypal-mysql
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: yash8252
     ports:
@@ -14,16 +14,16 @@ services:
       - mysql-data:/var/lib/mysql
       - ./init-db:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-pyash8252" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pyash8252"]
       interval: 5s
       timeout: 5s
       retries: 10
 
 
-
   kafka:
     image: apache/kafka:3.7.0
     container_name: kafka
+    restart: always
     ports:
       - "9092:9092"
     environment:
@@ -42,16 +42,15 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
 
-
   discovery-server:
     build:
       context: .
       dockerfile: discovery-server/Dockerfile
     image: paypal-discovery-server:1.0
     container_name: discovery-server
+    restart: always
     ports:
       - "8761:8761"
-
 
 
   api-gateway:
@@ -60,9 +59,12 @@ services:
       dockerfile: api-gateway/Dockerfile
     image: paypal-api-gateway:1.0
     container_name: api-gateway
+    restart: always
 
     depends_on:
       discovery-server:
+        condition: service_started
+      auth-service:
         condition: service_started
 
     ports:
@@ -73,13 +75,13 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
 
 
-
   auth-service:
     build:
       context: .
       dockerfile: auth-service/Dockerfile
     image: paypal-auth-service:1.0
     container_name: auth-service
+    restart: always
 
     depends_on:
       mysql:
@@ -102,13 +104,13 @@ services:
       JWT_SECRET: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
 
 
-
   user-service:
     build:
       context: .
       dockerfile: user-service/Dockerfile
     image: paypal-user-service:1.0
     container_name: user-service
+    restart: always
     depends_on:
       mysql:
         condition: service_healthy
@@ -127,13 +129,13 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
 
 
-
   merchant-service:
     build:
       context: .
       dockerfile: merchant-service/Dockerfile
     image: paypal-merchant-service:1.0
     container_name: merchant-service
+    restart: always
     depends_on:
       mysql:
         condition: service_healthy
