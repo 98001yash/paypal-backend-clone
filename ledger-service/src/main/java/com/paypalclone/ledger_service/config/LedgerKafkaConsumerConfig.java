@@ -25,7 +25,7 @@ public class LedgerKafkaConsumerConfig {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "ledger-service");
 
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

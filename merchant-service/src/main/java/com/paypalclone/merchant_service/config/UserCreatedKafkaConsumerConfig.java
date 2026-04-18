@@ -27,7 +27,7 @@ public class UserCreatedKafkaConsumerConfig {
         deserializer.setUseTypeHeaders(false);
 
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "merchant-service");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
