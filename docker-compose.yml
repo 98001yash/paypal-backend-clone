@@ -1,7 +1,18 @@
 version: "3.9"
 
+x-common-env: &common-env
+  SPRING_PROFILES_ACTIVE: docker
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+
+
+
 services:
 
+  # ======================
+  # MYSQL
+  # ======================
   mysql:
     image: mysql:8
     container_name: paypal-mysql
@@ -20,6 +31,9 @@ services:
       retries: 10
 
 
+  # ======================
+  # KAFKA
+  # ======================
   kafka:
     image: apache/kafka:3.7.0
     container_name: kafka
@@ -42,6 +56,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
 
+  # ======================
+  # EUREKA
+  # ======================
   discovery-server:
     build:
       context: .
@@ -53,6 +70,9 @@ services:
       - "8761:8761"
 
 
+  # ======================
+  # API GATEWAY
+  # ======================
   api-gateway:
     build:
       context: .
@@ -60,21 +80,23 @@ services:
     image: paypal-api-gateway:1.0
     container_name: api-gateway
     restart: always
-
     depends_on:
       discovery-server:
         condition: service_started
       auth-service:
         condition: service_started
-
     ports:
       - "8081:8081"
-
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
 
 
+
+  # ======================
+  # AUTH SERVICE
+  # ======================
   auth-service:
     build:
       context: .
@@ -82,7 +104,6 @@ services:
     image: paypal-auth-service:1.0
     container_name: auth-service
     restart: always
-
     depends_on:
       mysql:
         condition: service_healthy
@@ -90,20 +111,19 @@ services:
         condition: service_started
       discovery-server:
         condition: service_started
-
     ports:
       - "8090:8090"
-
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_authdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
       JWT_SECRET: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
 
 
+  # ======================
+  # USER SERVICE
+  # ======================
   user-service:
     build:
       context: .
@@ -121,12 +141,10 @@ services:
     ports:
       - "8091:8091"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_userdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
 
 
   merchant-service:
@@ -146,13 +164,10 @@ services:
     ports:
       - "8092:8092"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_merchantdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
-
 
 
   account-service:
@@ -161,6 +176,7 @@ services:
       dockerfile: account-service/Dockerfile
     image: paypal-account-service:1.0
     container_name: account-service
+    restart: always
     depends_on:
       mysql:
         condition: service_healthy
@@ -171,13 +187,10 @@ services:
     ports:
       - "8093:8093"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_accountdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
-
 
 
   ledger-service:
@@ -186,6 +199,7 @@ services:
       dockerfile: ledger-service/Dockerfile
     image: paypal-ledger-service:1.0
     container_name: ledger-service
+    restart: always
     depends_on:
       mysql:
         condition: service_healthy
@@ -196,13 +210,10 @@ services:
     ports:
       - "8094:8094"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_ledgerdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
-
 
 
   balance-project-service:
@@ -211,6 +222,7 @@ services:
       dockerfile: balance-project-service/Dockerfile
     image: paypal-balance-projection-service:1.0
     container_name: balance-project-service
+    restart: always
     depends_on:
       mysql:
         condition: service_healthy
@@ -221,13 +233,10 @@ services:
     ports:
       - "8095:8095"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_projectiondb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
-
 
 
   order-service:
@@ -236,6 +245,7 @@ services:
       dockerfile: order-service/Dockerfile
     image: paypal-order-service:1.0
     container_name: order-service
+    restart: always
     depends_on:
       mysql:
         condition: service_healthy
@@ -246,12 +256,10 @@ services:
     ports:
       - "8096:8096"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_orderdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
 
 
   payment-intent-service:
@@ -260,6 +268,7 @@ services:
       dockerfile: payment-intent-service/Dockerfile
     image: paypal-payment-intent-service:1.0
     container_name: payment-intent-service
+    restart: always
     depends_on:
       mysql:
         condition: service_healthy
@@ -270,13 +279,10 @@ services:
     ports:
       - "8097:8097"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_payment_intentdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
-
 
 
   payout-service:
@@ -285,6 +291,7 @@ services:
       dockerfile: payout-service/Dockerfile
     image: paypal-payout-service:1.0
     container_name: payout-service
+    restart: always
     depends_on:
       mysql:
         condition: service_healthy
@@ -295,13 +302,39 @@ services:
     ports:
       - "8098:8098"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      <<: *common-env
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/paypal_payoutdb?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash8252
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+
+
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    restart: always
+    ports:
+      - "9411:9411"
 
 
 volumes:
   mysql-data:
+  grafana-data:

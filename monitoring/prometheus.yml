@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'microservices'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - api-gateway:8081
+          - auth-service:8090
+          - user-service:8091
+          - merchant-service:8092
+          - account-service:8093
+          - ledger-service:8094
+          - balance-project-service:8095
+          - order-service:8096
+          - payment-intent-service:8097
+          - payout-service:8098
