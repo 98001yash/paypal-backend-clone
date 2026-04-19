@@ -21,12 +21,22 @@ spec:
           env:
             - name: MYSQL_ROOT_PASSWORD
               value: yash8252
+            - name: MYSQL_ROOT_HOST
+              value: "%"
 
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
 
+
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d
+
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
             claimName: mysql-pvc
+
+        - name: mysql-init
+          configMap:
+            name: mysql-init-script
