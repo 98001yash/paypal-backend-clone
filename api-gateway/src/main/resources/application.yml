@@ -7,7 +7,6 @@ spring:
 
   cloud:
     gateway:
-
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
 
@@ -26,13 +25,10 @@ spring:
             allowCredentials: true
 
       routes:
-
-        # ? AUTH SERVICE (PUBLIC)
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/auth/**
-
 
         - id: user-service
           uri: lb://USER-SERVICE
@@ -41,14 +37,12 @@ spring:
           filters:
             - AuthenticationFilter
 
-        # INTERNAL SYSTEM APIs
         - id: user-service-internal
           uri: lb://USER-SERVICE
           predicates:
             - Path=/internal/**
           filters:
             - InternalServiceFilter
-
 
         - id: merchant-service
           uri: lb://MERCHANT-SERVICE
@@ -57,14 +51,12 @@ spring:
           filters:
             - AuthenticationFilter
 
-
         - id: account-service
           uri: lb://ACCOUNT-SERVICE
           predicates:
             - Path=/accounts/**
           filters:
             - AuthenticationFilter
-
 
         - id: ledger-service
           uri: lb://LEDGER-SERVICE
@@ -73,14 +65,12 @@ spring:
           filters:
             - AuthenticationFilter
 
-
         - id: balance-projection-service
           uri: lb://BALANCE-PROJECTION-SERVICE
           predicates:
             - Path=/balances/**
           filters:
             - AuthenticationFilter
-
 
         - id: order-service
           uri: lb://ORDER-SERVICE
@@ -89,11 +79,29 @@ spring:
           filters:
             - AuthenticationFilter
 
-
 jwt:
   secret: mysupersecurekeyformysafarsaathijwt1234567890abcdefABCDEF1234567890
   issuer: auth-service
   audience: paypal-backend
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
 
 eureka:
   client:
