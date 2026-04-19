@@ -6,6 +6,6 @@ spec:
   selector:
     app: account-service
   ports:
-    - port: 8092
+    - port: 8093
       targetPort: 8093
   type: ClusterIP
