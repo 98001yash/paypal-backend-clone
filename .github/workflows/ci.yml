@@ -20,3 +20,6 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install -DskipTests
+
+      - name: Build Docker images
+        run: docker-compose build
